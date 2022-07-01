@@ -20,7 +20,7 @@ def unique_test_id():
 def remote_s3_path(unique_test_id):
     accesskey, secretkey, base, endpoint = prepare_remote_test()
     if accesskey is None:
-        yield None, None
+        return None, None
 
     path_base_remote = os.path.join(base, unique_test_id)
 
@@ -40,7 +40,7 @@ def remote_s3_path(unique_test_id):
 
 
 def prepare_remote_test():
-    path_config = "config.json"
+    path_config = "_config.json"
     if not os.path.exists(path_config):
         warnings.warn("No test configuration file for S3FS found.")
         return None, None, None, None
