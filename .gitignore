@@ -1,0 +1,9 @@
+.idea/
+*.egg-info/
+__pycache__/
+dist/
+.venv/
+
+tests/tools/config.json
+tests/**/cache
+tests/fixtures/

@@ -1,0 +1,6 @@
+{
+  "accesskey": "pynbcache-citest-acc",
+  "secretkey": "pynbcache-citest-sec",
+  "base": "/homes/stier/cache/ci-tests/",
+  "endpoint": "https://share.pads.fim.uni-passau.de"
+}
