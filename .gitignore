@@ -4,6 +4,6 @@ __pycache__/
 dist/
 .venv/
 
-tests/tools/config.json
+tests/config.json
 tests/**/cache
 tests/fixtures/
