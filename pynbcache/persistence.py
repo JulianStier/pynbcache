@@ -112,6 +112,24 @@ class CacheManager(object):
 
         return self
 
+    def get_results(self, key: str) -> list:
+        cache_meta = self._load_meta()
+
+        files_cache = cache_meta[cache_meta["key"] == key].sort_values(
+            "time_create_cache", ascending=False
+        )["file_cache"]
+        return [
+            pickle_load(os.path.join(self._path_base, file_cache))
+            for file_cache in files_cache
+        ]
+
+    def get_hashes(self, key: str) -> pd.DataFrame:
+        cache_meta = self._load_meta()
+
+        return cache_meta[cache_meta["key"] == key].sort_values(
+            "time_create_cache", ascending=False
+        )[["hash_code", "hash_args", "hash_kwargs"]]
+
     def clear_local(self) -> CacheManager:
         self._ensure_base_path()
         files = glob.glob(self._path_base + os.path.sep + f"cache-{self._context}*")
@@ -212,13 +230,17 @@ class CacheManager(object):
         path_cache = os.path.join(self._path_base, file_cache)
         return pickle_load(path_cache)
 
+    def hashes(self, func: callable, args: list = None, kwargs: dict = None):
+        hash_code = hashlib.sha256(marshal.dumps(func.__code__)).hexdigest()
+        hash_args = hashlib.sha256(marshal.dumps(args)).hexdigest()
+        hash_kwargs = hashlib.sha256(marshal.dumps(kwargs)).hexdigest()
+        return hash_code, hash_args, hash_kwargs
+
     def store(
         self, result, key: str, func: callable, args: list = None, kwargs: dict = None
     ):
         name_cache = f"cache-{self._context}-{key}-{str(uuid.uuid4())}.pickle"
-        hash_code = hashlib.sha256(marshal.dumps(func.__code__)).hexdigest()
-        hash_args = hashlib.sha256(marshal.dumps(args)).hexdigest()
-        hash_kwargs = hashlib.sha256(marshal.dumps(kwargs)).hexdigest()
+        hash_code, hash_args, hash_kwargs = self.hashes(func, args, kwargs)
 
         path_cache = os.path.join(self._path_base, name_cache)
         assert not os.path.exists(

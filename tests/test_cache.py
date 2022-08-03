@@ -80,3 +80,45 @@ def test_get_cm(tmpdir, unique_test_id):
 
     cm = get_cachemanager_for(my_calc1)
     assert cm is not None
+
+
+def test_basic_cache_detect_param_change(tmpdir):
+    key_cache = "compute-" + test_basic_cache_detect_param_change.__name__
+    path_local_cache = tmpdir.mkdir("cache")
+    result_compute = np.random.randint(1, 1000)
+    n_calls = 10
+
+    @cache(key=key_cache, base=path_local_cache)
+    def compute_with(param: int):
+        return result_compute * param
+
+    i_rand = np.random.randint(n_calls)
+    assert compute_with(1) == result_compute
+    assert compute_with(i_rand) == result_compute * i_rand
+
+    cm = get_cachemanager_for(compute_with)
+    assert cm.contains(key_cache)
+
+    for i in range(n_calls):
+        compute_with(i)
+
+    assert len(cm.get_results(key_cache)) == n_calls
+
+
+def test_return_hashes(tmpdir):
+    key_cache = "compute-" + test_basic_cache_detect_param_change.__name__
+    path_local_cache = tmpdir.mkdir("cache")
+    result_compute = np.random.randint(1, 1000)
+    n_calls = 10
+
+    @cache(key=key_cache, base=path_local_cache)
+    def compute_with(param: int):
+        return result_compute * param
+
+    for i in range(n_calls):
+        compute_with(i)
+        compute_with(i)
+
+    cm = get_cachemanager_for(compute_with)
+    assert cm.contains(key_cache)
+    assert len(cm.get_hashes(key_cache)) == n_calls

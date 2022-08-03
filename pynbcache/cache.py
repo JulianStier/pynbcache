@@ -13,20 +13,51 @@ from pynbcache.persistence import CodeChanged
 from pynbcache.persistence import ParametersChanged
 
 
-def configure(s3_access_key: str = None, s3_base: str = None, s3_endpoint: str = None):
-    pass
+__PYNBCACHE_DEFAULT_PATH_BASE = "cache/"
+__PYNBCACHE_DEFAULT_S3_ACCESS_KEY = None
+__PYNBCACHE_DEFAULT_S3_SECRET_KEY = None
+__PYNBCACHE_DEFAULT_S3_BASE = None
+__PYNBCACHE_DEFAULT_S3_ENDPOINT = None
+
+
+def configure(
+    s3_access_key: str = None,
+    s3_secret_key: str = None,
+    s3_base: str = None,
+    s3_endpoint: str = None,
+):
+    global __PYNBCACHE_DEFAULT_S3_ACCESS_KEY
+    global __PYNBCACHE_DEFAULT_S3_SECRET_KEY
+    global __PYNBCACHE_DEFAULT_S3_BASE
+    global __PYNBCACHE_DEFAULT_S3_ENDPOINT
+    __PYNBCACHE_DEFAULT_S3_ACCESS_KEY = s3_access_key
+    __PYNBCACHE_DEFAULT_S3_SECRET_KEY = s3_secret_key
+    __PYNBCACHE_DEFAULT_S3_BASE = s3_base
+    __PYNBCACHE_DEFAULT_S3_ENDPOINT = s3_endpoint
 
 
 def cache(key: str, *args, **kwargs):
-    path_base_cache = str(kwargs["base"]) if "base" in kwargs else "cache/"
+    path_base_cache = (
+        str(kwargs["base"]) if "base" in kwargs else __PYNBCACHE_DEFAULT_PATH_BASE
+    )
     s3fs_access_key = (
-        str(kwargs["s3_access_key"]) if "s3_access_key" in kwargs else None
+        str(kwargs["s3_access_key"])
+        if "s3_access_key" in kwargs
+        else __PYNBCACHE_DEFAULT_S3_ACCESS_KEY
     )
     s3fs_secret_key = (
-        str(kwargs["s3_secret_key"]) if "s3_secret_key" in kwargs else None
+        str(kwargs["s3_secret_key"])
+        if "s3_secret_key" in kwargs
+        else __PYNBCACHE_DEFAULT_S3_SECRET_KEY
     )
-    s3fs_base = str(kwargs["s3_base"]) if "s3_base" in kwargs else None
-    s3fs_endpoint = str(kwargs["s3_endpoint"]) if "s3_endpoint" in kwargs else None
+    s3fs_base = (
+        str(kwargs["s3_base"]) if "s3_base" in kwargs else __PYNBCACHE_DEFAULT_S3_BASE
+    )
+    s3fs_endpoint = (
+        str(kwargs["s3_endpoint"])
+        if "s3_endpoint" in kwargs
+        else __PYNBCACHE_DEFAULT_S3_ENDPOINT
+    )
 
     def cache_decorator(func):
         cm = CacheManager(
